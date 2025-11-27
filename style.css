@@ -1,0 +1,102 @@
+/* Simple centered card, you can customize theme later */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #102a43, #020617);
+  color: #e5f4ff;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+}
+
+.miner-card {
+  background: rgba(3, 16, 35, 0.95);
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(111, 207, 255, 0.45);
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.subtitle {
+  margin: 4px 0 12px;
+  font-size: 13px;
+  color: #9cbbee;
+}
+
+.info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #a8c7f5;
+  margin-bottom: 16px;
+}
+
+.coin-display {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(6, 31, 65, 0.9);
+  border: 1px solid rgba(123, 207, 255, 0.7);
+  margin-bottom: 16px;
+}
+
+#coinCount {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.coin-label {
+  font-size: 13px;
+  color: #9cbbee;
+}
+
+#mineButton {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #46e6ff, #2a89ff);
+  color: #020617;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#mineButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #9cbbee;
+  min-height: 16px;
+}
