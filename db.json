@@ -1,8 +1,4 @@
 {
-  "settings": {
-    "MINING_REWARD": 0.01,
-    "MAX_MINING_PER_DAY": 100
-  },
   "users": {}
 }
 

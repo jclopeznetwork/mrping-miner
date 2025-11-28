@@ -1,97 +1,90 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const cors = require("cors");
-const bodyParser = require("body-parser");
+import express from "express";
+import fs from "fs";
+import path from "path";
+import cors from "cors";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.static("public"));
 
-// ------------------------------
+const DB_FILE = "./db.json";
+
 // Load DB
-// ------------------------------
-const DB_FILE = path.join(__dirname, "db.json");
-
-function readDB() {
-  return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+function loadDB() {
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify({ users: {} }, null, 2));
+  }
+  return JSON.parse(fs.readFileSync(DB_FILE));
 }
 
-function writeDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+// Save DB
+function saveDB(db) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 }
 
-// ------------------------------
-// API ROUTES
-// ------------------------------
-app.post("/api/user", (req, res) => {
-  const { userId, username } = req.body;
+// 🟦 Verify Telegram initData (IMPORTANT)
+async function verifyTelegram(initData) {
+  if (!initData || !initData.user) return null;
+  return initData.user.id.toString();
+}
 
-  if (!userId) return res.status(400).json({ error: "Missing userId" });
+// ==============================
+//  API: Get User
+// ==============================
+app.post("/api/user", async (req, res) => {
+  const initData = req.body.initData;
+  const tgUserId = await verifyTelegram(initData);
 
-  const db = readDB();
+  if (!tgUserId) return res.json({ error: "Invalid Telegram data" });
 
-  if (!db.users[userId]) {
-    db.users[userId] = {
-      id: userId,
-      username: username || "guest",
-      balance: 0,
-      miningClicksToday: 0,
-      lastMiningDate: null,
-    };
-    writeDB(db);
+  let db = loadDB();
+  if (!db.users[tgUserId]) {
+    db.users[tgUserId] = { balance: 0 };
+    saveDB(db);
   }
 
-  return res.json({
-    ...db.users[userId],
-    settings: db.settings,
+  res.json({
+    ok: true,
+    userId: tgUserId,
+    balance: db.users[tgUserId].balance
   });
 });
 
-app.post("/api/mine", (req, res) => {
-  const { userId } = req.body;
+// ==============================
+//  API: Mine Coins
+// ==============================
+app.post("/api/mine", async (req, res) => {
+  const initData = req.body.initData;
+  const tgUserId = await verifyTelegram(initData);
 
-  const db = readDB();
-  const user = db.users[userId];
+  if (!tgUserId) return res.json({ error: "Invalid Telegram data" });
 
-  if (!user) return res.status(400).json({ error: "User not found" });
-
-  const today = new Date().toISOString().slice(0, 10);
-
-  if (user.lastMiningDate !== today) {
-    user.lastMiningDate = today;
-    user.miningClicksToday = 0;
+  let db = loadDB();
+  if (!db.users[tgUserId]) {
+    db.users[tgUserId] = { balance: 0 };
   }
 
-  if (user.miningClicksToday >= db.settings.MAX_MINING_PER_DAY) {
-    return res.json({ error: "Daily limit reached" });
-  }
+  db.users[tgUserId].balance += 1;
+  saveDB(db);
 
-  user.balance += db.settings.MINING_REWARD;
-  user.miningClicksToday++;
-
-  writeDB(db);
-
-  return res.json({ success: true, balance: user.balance });
+  res.json({
+    ok: true,
+    balance: db.users[tgUserId].balance
+  });
 });
 
-// Leaderboard
-app.get("/api/leaderboard", (req, res) => {
-  const db = readDB();
-
-  const top = Object.values(db.users)
-    .sort((a, b) => b.balance - a.balance)
-    .slice(0, 20);
-
-  res.json({ top });
+// ==============================
+//  FRONTEND
+// ==============================
+app.get("*", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "public", "index.html"));
 });
 
-// ------------------------------
-// START SERVER
-// ------------------------------
+// ==============================
 const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
 
-app.listen(PORT, () =>
-  console.log("MrPing backend running on port", PORT)
-);
