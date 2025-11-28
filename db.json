@@ -1,10 +1,13 @@
 {
-  "users": {
-    "guest-989464741": {
-      "id": "guest-989464741",
-      "username": "guest",
-      "coins": 34,
-      "totalMined": 34
-    }
+  "users": [],
+  "withdrawals": [],
+  "settings": {
+    "OWNER_WALLET_ADDRESS": "",
+    "MIN_WITHDRAW": 100,
+    "BONUS_PERCENT": 10,
+    "BONUS_INVEST_EQUIV": 300,
+    "BONUS_LOCK_DAYS": 3,
+    "BONUS_EARLY_TAX_PERCENT": 30,
+    "MAX_MINING_CLICKS_PER_DAY": 300
   }
 }
